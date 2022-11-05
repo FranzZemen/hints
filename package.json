@@ -1,0 +1,41 @@
+{
+  "name": "@franzzemen/hints",
+  "version": "1.0.0",
+  "description": "Text based hints",
+  "type": "module",
+  "main": "index.jsn",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FranzZemen/hints.git"
+  },
+  "keywords": [
+    "Hints"
+  ],
+  "author": "Franz Zemen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FranzZemen/hints/issues"
+  },
+  "homepage": "https://github.com/FranzZemen/hints#readme",
+  "devDependencies": {
+    "@franzzemen/gulp-base": "^12.1.1",
+    "@franzzemen/npmu": "^2.0.18",
+    "@franzzemen/test": "^1.0.4",
+    "@types/chai": "^4.3.3",
+    "@types/lodash": "^4.14.188",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^18.11.9",
+    "chai": "^4.3.6",
+    "fastest-validator": "^1.15.0",
+    "gulp": "^4.0.2",
+    "gulp-mocha": "^8.0.0",
+    "mocha": "^10.1.0",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "@franzzemen/module-resolver": "^1.0.1"
+  }
+}

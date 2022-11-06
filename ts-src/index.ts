@@ -75,7 +75,8 @@ export class Hints extends Map<string, string | Object> {
   }): string {
     // Capture remaining
     let remaining = near;
-    const remainingRegExp = new RegExp(`^${enclosure.start}${prefix}[-\\s\\t\\r\\n\\v\\f\\u2028\\u2029".,=>:\(\)@\\[\\]{}/_a-zA-Z0-9]*${enclosure.end}([^]*)$`);
+    //const remainingRegExp = new RegExp(`^${enclosure.start}${prefix}[-\\s\\t\\r\\n\\v\\f\\u2028\\u2029".,=>:\(\)@\\[\\]{}/_a-zA-Z0-9]*${enclosure.end}([^]*)$`);
+    const remainingRegExp = new RegExp(`^${enclosure.start}${prefix}[-\\s".,=>:\(\)@\\[\\]{}/_a-zA-Z0-9]*${enclosure.end}([^]*)$`);
     const result2 = remainingRegExp.exec(remaining);
     if (result2) {
       remaining = result2[1].trim();
@@ -115,7 +116,8 @@ export class Hints extends Map<string, string | Object> {
     end: '>>'
   }): Hints {
     const log = new LoggerAdapter(ec, 'app-utility', 'hints', 'captureHints');
-    const regExp = new RegExp(`^${enclosure.start}${prefix}([-\\s\\t\\r\\n\\v\\f\\u2028\\u2029".,=>:\(\)@\\[\\]{}/_a-zA-Z0-9]*)${enclosure.end}[^]*$`);
+    //const regExp = new RegExp(`^${enclosure.start}${prefix}([-\\s\\t\\r\\n\\v\\f\\u2028\\u2029".,=>:\(\)@\\[\\]{}/_a-zA-Z0-9]*)${enclosure.end}[^]*$`);
+    const regExp = new RegExp(`^${enclosure.start}${prefix}([-\\s".,=>:\(\)@\\[\\]{}/_a-zA-Z0-9]*)${enclosure.end}[^]*$`);
     const result = regExp.exec(near);
     if (result) {
       const hints: Hints = new Hints(result[1].trim(), ec);
@@ -134,7 +136,8 @@ export class Hints extends Map<string, string | Object> {
     end: '>>'
   }): Hints | Promise<Hints> {
     const log = new LoggerAdapter(ec, 'app-utility', 'hints', 'captureHints');
-    const regExp = new RegExp(`^${enclosure.start}${prefix}([-\\s\\t\\r\\n\\v\\f\\u2028\\u2029".,=>:\(\)@\\[\\]{}/_a-zA-Z0-9]*)${enclosure.end}[^]*$`);
+    //const regExp = new RegExp(`^${enclosure.start}${prefix}([-\\s\\t\\r\\n\\v\\f\\u2028\\u2029".,=>:\(\)@\\[\\]{}/_a-zA-Z0-9]*)${enclosure.end}[^]*$`);
+    const regExp = new RegExp(`^${enclosure.start}${prefix}([-\\s".,=>:\(\)@\\[\\]{}/_a-zA-Z0-9]*)${enclosure.end}[^]*$`);
     const result = regExp.exec(near);
     if (result) {
       const hints: Hints = new Hints(result[1].trim(), ec);
@@ -183,7 +186,8 @@ export class Hints extends Map<string, string | Object> {
   public load(moduleResolver: ModuleResolver, prefix: string, ec?: LogExecutionContext) {
     const log = new LoggerAdapter(ec, 'app-utility', 'hints', 'loadAndInitialize');
     // Locate name, value pairs with JSON
-    let nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*([\[{][^]*[}|\]])/g;
+    //let nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*([\[{][^]*[}|\]])/g;
+    let nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s]*=[\s]*([\[{][^]*[}|\]])/g;
     let match = undefined;
     let matchBoundaries: { start: number, end: number }[] = [];
     while ((match = nvRegex.exec(this.hintBody)) !== null) {
@@ -205,7 +209,8 @@ export class Hints extends Map<string, string | Object> {
     });
 
     // Locate name, JSON from relative files
-    nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*@\(require:([a-zA-Z0-9 ./\\-_]+\.json)\)/g;
+    nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s]*=[\s]*@\(require:([a-zA-Z0-9 ./\\-_]+\.json)\)/g;
+    //nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*@\(require:([a-zA-Z0-9 ./\\-_]+\.json)\)/g;
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {
@@ -235,7 +240,8 @@ export class Hints extends Map<string, string | Object> {
     });
 
     // Locate name, value pairs with quotes
-    nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*"([.\/\-_a-zA-Z0-9\s\t\r\n\v\f\u2028\u2029]+)"/g;
+    nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s]*=[\s]*"([.\/\-_a-zA-Z0-9\s]+)"/g;
+    //nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*"([.\/\-_a-zA-Z0-9\s\t\r\n\v\f\u2028\u2029]+)"/g;
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {
@@ -248,7 +254,8 @@ export class Hints extends Map<string, string | Object> {
     });
 
     // Locate name, value pairs without quotes
-    nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*([.\/\-_a-zA-Z0-9]+)/g;
+    nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s]*=[\s]*([.\/\-_a-zA-Z0-9]+)/g;
+    //nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*([.\/\-_a-zA-Z0-9]+)/g;
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {
@@ -259,7 +266,8 @@ export class Hints extends Map<string, string | Object> {
       hintsCopy = hintsCopy.substring(0, boundary.start) + hintsCopy.substring(boundary.end);
     });
     // Locate name, JSON from package/functions/attributes. Only creates the module definition.  Does not load the JSON inline for ES modules
-    nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*@\((require|import):([a-zA-Z0-9 @./\\-_]+)(:|=>)([a-zA-Z0-9_.\[\]"']+)\)/g;
+    nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s]*=[\s]*@\((require|import):([a-zA-Z0-9 @./\\-_]+)(:|=>)([a-zA-Z0-9_.\[\]"']+)\)/g;
+    //nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*@\((require|import):([a-zA-Z0-9 @./\\-_]+)(:|=>)([a-zA-Z0-9_.\[\]"']+)\)/g;
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {

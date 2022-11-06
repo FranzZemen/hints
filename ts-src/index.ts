@@ -2,21 +2,18 @@
 Created by Franz Zemen 11/04/2022
 License Type: MIT
 */
-export * from '@franzzemen/module-resolver';
-
-import {EnhancedError, logErrorAndThrow} from '@franzzemen/enhanced-error';
 import {ModuleDefinition} from '@franzzemen/module-factory';
+import {LogExecutionContext, LoggerAdapter} from '@franzzemen/logger-adapter';
+import {logErrorAndThrow, logErrorAndReturn, EnhancedError} from '@franzzemen/enhanced-error';
 import {
-  loadJSONResource, LoadPackageType, logErrorAndReturn, LogExecutionContext, LoggerAdapter,
-  ModuleResolution,
   ModuleResolutionActionInvocation,
   ModuleResolutionResult,
   ModuleResolutionSetterInvocation,
-  ModuleResolver
+  ModuleResolver, LoadPackageType
 } from '@franzzemen/module-resolver';
+import {ModuleResolution, loadJSONResource} from '@franzzemen/module-factory';
 import {isPromise} from 'util/types';
 import {v4 as uuidv4} from 'uuid';
-
 
 
 export interface HintAwaitingModuleLoad {

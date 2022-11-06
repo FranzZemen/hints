@@ -2,6 +2,8 @@
 Created by Franz Zemen 11/04/2022
 License Type: MIT
 */
+export * from '@franzzemen/module-resolver';
+
 import {EnhancedError, logErrorAndThrow} from '@franzzemen/enhanced-error';
 import {ModuleDefinition} from '@franzzemen/module-factory';
 import {

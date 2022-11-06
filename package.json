@@ -1,6 +1,6 @@
 {
   "name": "@franzzemen/hints",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Text based hints",
   "type": "module",
   "main": "index.jsn",

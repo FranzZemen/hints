@@ -2,16 +2,16 @@
 Created by Franz Zemen 11/04/2022
 License Type: MIT
 */
-import {ModuleDefinition} from '@franzzemen/module-factory';
+import {EnhancedError, logErrorAndReturn, logErrorAndThrow} from '@franzzemen/enhanced-error';
 import {LogExecutionContext, LoggerAdapter} from '@franzzemen/logger-adapter';
-import {logErrorAndThrow, logErrorAndReturn, EnhancedError} from '@franzzemen/enhanced-error';
+import {loadJSONResource, ModuleDefinition} from '@franzzemen/module-factory';
 import {
+  FactoryType,
   ModuleResolutionActionInvocation,
   ModuleResolutionResult,
   ModuleResolutionSetterInvocation,
-  ModuleResolver, LoadPackageType
+  ModuleResolver
 } from '@franzzemen/module-resolver';
-import {ModuleResolution, loadJSONResource} from '@franzzemen/module-factory';
 import {isPromise} from 'util/types';
 import {v4 as uuidv4} from 'uuid';
 
@@ -162,7 +162,7 @@ export class Hints extends Map<string, string | Object> {
   // For use by ModuleResolver
   setHintResolution: ModuleResolutionSetterInvocation = (key: string, value: any, result: ModuleResolutionResult, ec?: LogExecutionContext) => {
     super.set(key, value);
-    return true;
+    return Promise.resolve(true);
   };
 
   initActionResolution: ModuleResolutionActionInvocation = (successfulResolution: boolean, prefix: string, ec?: LogExecutionContext) => {
@@ -173,7 +173,7 @@ export class Hints extends Map<string, string | Object> {
       super.set(prefix, prefix);
       super.set('prefix', prefix);
     }
-    return true;
+    return Promise.resolve(true);
   };
 
   /**
@@ -185,7 +185,6 @@ export class Hints extends Map<string, string | Object> {
   public load(moduleResolver: ModuleResolver, prefix: string, ec?: LogExecutionContext) {
     const log = new LoggerAdapter(ec, 'app-utility', 'hints', 'loadAndInitialize');
     // Locate name, value pairs with JSON
-    //let nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*([\[{][^]*[}|\]])/g;
     let nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s]*=[\s]*([\[{][^]*[}|\]])/g;
     let match = undefined;
     let matchBoundaries: { start: number, end: number }[] = [];
@@ -208,24 +207,37 @@ export class Hints extends Map<string, string | Object> {
     });
 
     // Locate name, JSON from relative files
-    nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s]*=[\s]*@\(require:([a-zA-Z0-9 ./\\-_]+\.json)\)/g;
-    //nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*@\(require:([a-zA-Z0-9 ./\\-_]+\.json)\)/g;
+    nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s]*=[\s]*@\((require|import):([-a-zA-Z0-9 ./\\_]+\.json)\)/g;
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {
-      const resource = match[2].trim();
+      const key = match[1].trim();
+      const resource = match[3].trim();
       try {
-        const moduleDef: ModuleDefinition = {
-          moduleName: resource,
-          moduleResolution: ModuleResolution.json
+        const module: ModuleDefinition = {
+          moduleName: resource
         };
-        const json = loadJSONResource(moduleDef, log.nativeLogger);
-        if (isPromise(json)) {
-          // It shouldn't be returning a promise.  If that ever changes, then follow the same pattern as for module definitions; we want to
-          // parse synchronously
-          logErrorAndThrow(new EnhancedError('Should not be returning a promise as we do not provide a check function'), log);
-        }
-        super.set(match[1], json);
+
+        moduleResolver.add({
+          refName: key,
+          loader: {
+            module,
+            loadPackageType: FactoryType.jsonFile
+          },
+          setter: {
+            ownerIsObject: true,
+            objectRef: this,
+            _function: 'setHintResolution',
+            paramsArray: [ec]
+          },
+          action: {
+            dedupId: this.resolverDedupId,
+            ownerIsObject: true,
+            objectRef: this,
+            _function: 'initActionResolution',
+            paramsArray: [prefix, ec]
+          }
+        });
       } catch (err) {
         const error = new Error(`Cannot load JSON from relative path ${resource}`);
         log.error(err);
@@ -240,7 +252,6 @@ export class Hints extends Map<string, string | Object> {
 
     // Locate name, value pairs with quotes
     nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s]*=[\s]*"([.\/\-_a-zA-Z0-9\s]+)"/g;
-    //nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*"([.\/\-_a-zA-Z0-9\s\t\r\n\v\f\u2028\u2029]+)"/g;
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {
@@ -254,7 +265,6 @@ export class Hints extends Map<string, string | Object> {
 
     // Locate name, value pairs without quotes
     nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s]*=[\s]*([.\/\-_a-zA-Z0-9]+)/g;
-    //nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*([.\/\-_a-zA-Z0-9]+)/g;
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {
@@ -266,16 +276,10 @@ export class Hints extends Map<string, string | Object> {
     });
     // Locate name, JSON from package/functions/attributes. Only creates the module definition.  Does not load the JSON inline for ES modules
     nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s]*=[\s]*@\((require|import):([a-zA-Z0-9 @./\\-_]+)(:|=>)([a-zA-Z0-9_.\[\]"']+)\)/g;
-    //nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s\t\r\n\v\f\u2028\u2029]*=[\s\t\r\n\v\f\u2028\u2029]*@\((require|import):([a-zA-Z0-9 @./\\-_]+)(:|=>)([a-zA-Z0-9_.\[\]"']+)\)/g;
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {
       const key = match[1].trim();
-      const importStatement = match[2].trim();
-      let moduleResolution = ModuleResolution.commonjs;
-      if (importStatement === 'import') {
-        moduleResolution = ModuleResolution.es;
-      }
       const moduleName = match[3].trim();
       const attribOrFunction = match[4].trim();
       let functionName: string, propertyName: string;
@@ -287,8 +291,7 @@ export class Hints extends Map<string, string | Object> {
       const module: ModuleDefinition = {
         moduleName,
         functionName,
-        propertyName,
-        moduleResolution
+        propertyName
       };
       // Do add the hint with a temporary placeholder, it will be replaced upon resolution.
       const tempHintValue: HintAwaitingModuleLoad = {
@@ -301,22 +304,20 @@ export class Hints extends Map<string, string | Object> {
         refName: key,
         loader: {
           module,
-          loadPackageType: LoadPackageType.json
+          loadPackageType: FactoryType.jsonFactoryAttribute
         },
         setter: {
           ownerIsObject: true,
           objectRef: this,
           _function: 'setHintResolution',
-          paramsArray: [ec],
-          isAsync: false
+          paramsArray: [ec]
         },
         action: {
           dedupId: this.resolverDedupId,
           ownerIsObject: true,
           objectRef: this,
           _function: 'initActionResolution',
-          paramsArray: [prefix, ec],
-          isAsync: false
+          paramsArray: [prefix, ec]
         }
       });
       matchBoundaries.unshift({start: match.index, end: nvRegex.lastIndex});
@@ -340,17 +341,22 @@ export class Hints extends Map<string, string | Object> {
     });
     // Regardless of whether we loaded anything or not, we are in the ModuleResolver's world and
     // need to guarantee this object is initialized, but use same dedupid
-    moduleResolver.add({
-      refName: 'all',
-      action: {
-        dedupId: this.resolverDedupId,
-        ownerIsObject: true,
-        objectRef: this,
-        _function: 'initActionResolution',
-        paramsArray: [prefix, ec],
-        isAsync: false
-      }
-    });
+    // Only add module resolver action to initialize  if something was loaded.
+    if (moduleResolver.hasPendingResolutions()) {
+      moduleResolver.add({
+        refName: 'all',
+        action: {
+          dedupId: this.resolverDedupId,
+          ownerIsObject: true,
+          objectRef: this,
+          _function: 'initActionResolution',
+          paramsArray: [prefix, ec]
+        }
+      });
+    } else {
+      // Force initialization;
+      this.initActionResolution(true, prefix, ec);
+    }
     this.loaded = true;
   }
 
@@ -360,26 +366,19 @@ export class Hints extends Map<string, string | Object> {
     this.load(moduleResolver, prefix, ec);
     if (moduleResolver.hasPendingResolutions()) {
       const results = moduleResolver.resolve(ec);
-      if (isPromise(results)) {
-        return results
-          .then(resolutions => {
-            const someErrors = ModuleResolver.resolutionsHaveErrors(resolutions);
-            if (someErrors) {
-              log.warn(resolutions, 'Errors resolving modules');
-              throw logErrorAndReturn(new EnhancedError('Errors resolving modules'));
-            } else {
-              this.initialized = true;
-              moduleResolver.clear();
-              return this;
-            }
-          });
-      } else {
-        this.initialized = true;
-        moduleResolver.clear();
-        return this;
-      }
+      return results
+        .then(resolutions => {
+          const someErrors = ModuleResolver.resolutionsHaveErrors(resolutions);
+          if (someErrors) {
+            log.warn(resolutions, 'Errors resolving modules');
+            throw logErrorAndReturn(new EnhancedError('Errors resolving modules'));
+          } else {
+            this.initialized = true;
+            moduleResolver.clear();
+            return this;
+          }
+        });
     } else {
-      this.initialized = true;
       return this;
     }
   }

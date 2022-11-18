@@ -1,7 +1,10 @@
 import chai from 'chai';
 import 'mocha';
 import {isPromise} from 'util/types';
-import {Hints} from '../publish/index.js';
+// @ts-ignore
+import type {Hints as HintsType} from '@franzzemen/hints';
+// @ts-ignore
+import {Hints} from '@franzzemen/hints';
 
 
 let should = chai.should();
@@ -271,15 +274,19 @@ describe('Hint Tests', () => {
   });
 
   it('should load JSON from relative path ', () => {
-    const [remaining, hintsOrPromise] = Hints.parseAndResolveHints('<<re json = @(require:../../../testing/test.json)>>', 're');
+    const [remaining, hintsOrPromise] = Hints.parseAndResolveHints('<<re json = @(require:./testing-mjs/test.json)>>', 're');
     if(isPromise(hintsOrPromise)) {
-      unreachableCode.should.be.true;
-    } else {
-      const hints: Hints = hintsOrPromise;
+     return hintsOrPromise
+       // @ts-ignore
+       .then((hints :HintsType) => {
 
-      hints.size.should.equal(3);
-      const obj = hints.get('json');
-      remaining.should.equal('');
+        hints.size.should.equal(3);
+        const obj = hints.get('json');
+        remaining.should.equal('');
+        return;
+      })
+    } else {
+      unreachableCode.should.be.true;
     }
   });
 
@@ -288,7 +295,9 @@ describe('Hint Tests', () => {
     if(isPromise(hintsOrPromise)) {
       return hintsOrPromise
         .then(hints => {
+          // @ts-ignore
           hints.size.should.equal(3);
+          // @ts-ignore
           const obj = hints.get('json');
           obj['hello'].should.equal('world');
           remaining.should.equal('');
@@ -305,8 +314,9 @@ describe('Hint Tests', () => {
     if(isPromise(hintsOrPromise)) {
       return hintsOrPromise
         .then(hints => {
-
+          // @ts-ignore
           hints.size.should.equal(3);
+          // @ts-ignore
           const obj = hints.get('json');
           obj['prop'].should.equal('jsonStr');
           remaining.should.equal('');

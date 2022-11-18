@@ -222,7 +222,7 @@ export class Hints extends Map<string, string | Object> {
           refName: key,
           loader: {
             module,
-            loadPackageType: FactoryType.jsonFile
+            factoryType: FactoryType.jsonFile
           },
           setter: {
             ownerIsObject: true,
@@ -304,7 +304,7 @@ export class Hints extends Map<string, string | Object> {
         refName: key,
         loader: {
           module,
-          loadPackageType: FactoryType.jsonFactoryAttribute
+          factoryType: FactoryType.jsonFactoryAttribute
         },
         setter: {
           ownerIsObject: true,

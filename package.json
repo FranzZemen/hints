@@ -1,6 +1,6 @@
 {
   "name": "@franzzemen/hints",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Text based hints",
   "type": "module",
   "main": "./publish/cjs/index.js",
@@ -47,6 +47,6 @@
     "@franzzemen/enhanced-error": "^3.0.0",
     "@franzzemen/logger-adapter": "^6.0.0",
     "@franzzemen/module-factory": "^7.0.0",
-    "@franzzemen/module-resolver": "^3.0.1"
+    "@franzzemen/module-resolver": "^3.0.2"
   }
 }

@@ -1,10 +1,8 @@
 import chai from 'chai';
 import 'mocha';
 import {isPromise} from 'util/types';
-// @ts-ignore
-import type {Hints as HintsType} from '@franzzemen/hints';
-// @ts-ignore
-import {Hints} from '@franzzemen/hints';
+
+import {Hints} from '../publish/mjs/index.js'
 
 
 let should = chai.should();

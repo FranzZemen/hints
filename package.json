@@ -3,13 +3,9 @@
   "version": "2.0.2",
   "description": "Text based hints",
   "type": "module",
-  "main": "./publish/cjs/index.js",
-  "module": "publish/mjs/index.js",
-  "types": "publish/mjs/index.d.ts",
   "exports": {
     ".": {
-      "import": "./publish/mjs/index.js",
-      "require": "./publish/cjs/index.js"
+      "import": "./src/project/index.ts"
     }
   },
   "scripts": {
@@ -29,24 +25,23 @@
   },
   "homepage": "https://github.com/FranzZemen/hints#readme",
   "devDependencies": {
-    "@franzzemen/gulp-base": "^19.0.1",
-    "@franzzemen/npmu": "^4.0.4",
-    "@franzzemen/test": "^1.0.4",
-    "@types/chai": "^4.3.4",
-    "@types/lodash": "^4.14.189",
-    "@types/mocha": "^10.0.0",
-    "@types/node": "^18.11.9",
-    "chai": "^4.3.7",
-    "fastest-validator": "^1.15.0",
-    "gulp": "^4.0.2",
-    "gulp-mocha": "^8.0.0",
-    "mocha": "^10.1.0",
-    "typescript": "^4.9.3"
+    "@franzzemen/build-system": "^5.1.0",
+    "@franzzemen/test": "^3.0.1",
+    "@types/chai": "^4.3.16",
+    "@types/lodash": "^4.17.4",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.12.12",
+    "@types/uuid": "^9.0.8",
+    "chai": "^5.1.1",
+    "fastest-validator": "^1.18.0",
+    "mocha": "^10.4.0",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@franzzemen/enhanced-error": "^3.0.1",
-    "@franzzemen/logger-adapter": "^6.0.1",
-    "@franzzemen/module-factory": "^7.0.1",
-    "@franzzemen/module-resolver": "^3.0.4"
+    "@franzzemen/enhanced-error": "^5.0.0",
+    "@franzzemen/logger-adapter": "^10.2.1",
+    "@franzzemen/module-factory": "^9.0.0",
+    "@franzzemen/module-resolver": "^5.0.0",
+    "uuid": "^9.0.1"
   }
 }

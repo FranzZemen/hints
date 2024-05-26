@@ -78,6 +78,7 @@ export class Hints extends Map<string, string | Object> {
     const remainingRegExp = new RegExp(`^${enclosure.start}${prefix}[-\\s".,=>:\(\)@\\[\\]{}/_a-zA-Z0-9]*${enclosure.end}([^]*)$`);
     const result2 = remainingRegExp.exec(remaining);
     if (result2) {
+      // @ts-ignore
       remaining = result2[1].trim();
       return remaining;
     } else {
@@ -119,6 +120,7 @@ export class Hints extends Map<string, string | Object> {
     const regExp = new RegExp(`^${enclosure.start}${prefix}([-\\s".,=>:\(\)@\\[\\]{}/_a-zA-Z0-9]*)${enclosure.end}[^]*$`);
     const result = regExp.exec(near);
     if (result) {
+      // @ts-ignore
       const hints: Hints = new Hints(result[1].trim(), ec);
       hints.load(moduleResolver, prefix, ec);
       return hints;
@@ -139,6 +141,7 @@ export class Hints extends Map<string, string | Object> {
     const regExp = new RegExp(`^${enclosure.start}${prefix}([-\\s".,=>:\(\)@\\[\\]{}/_a-zA-Z0-9]*)${enclosure.end}[^]*$`);
     const result = regExp.exec(near);
     if (result) {
+      // @ts-ignore
       const hints: Hints = new Hints(result[1].trim(), ec);
       return hints.loadAndResolve(prefix, ec);
     } else {
@@ -160,6 +163,7 @@ export class Hints extends Map<string, string | Object> {
   }
 
   // For use by ModuleResolver
+  // @ts-ignore
   setHintResolution: ModuleResolutionSetterInvocation = (key: string, value: any, result: ModuleResolutionResult, ec?: LogExecutionContext) => {
     super.set(key, value);
     return Promise.resolve(true);
@@ -189,9 +193,11 @@ export class Hints extends Map<string, string | Object> {
     let match = undefined;
     let matchBoundaries: { start: number, end: number }[] = [];
     while ((match = nvRegex.exec(this.hintBody)) !== null) {
+      // @ts-ignore
       const jsonStr = match[2].trim();
       try {
         const json = JSON.parse(jsonStr);
+        // @ts-ignore
         super.set(match[1], json);
       } catch (err) {
         const error = new EnhancedError(`Cannot parse JSON hint ${jsonStr}`);
@@ -211,7 +217,9 @@ export class Hints extends Map<string, string | Object> {
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {
+      // @ts-ignore
       const key = match[1].trim();
+      // @ts-ignore
       const resource = match[3].trim();
       try {
         const module: ModuleDefinition = {
@@ -219,25 +227,25 @@ export class Hints extends Map<string, string | Object> {
         };
 
         moduleResolver.add({
-          refName: key,
-          loader: {
-            module,
-            factoryType: FactoryType.jsonFile
-          },
-          setter: {
-            ownerIsObject: true,
-            objectRef: this,
-            _function: 'setHintResolution',
-            paramsArray: [ec]
-          },
-          action: {
-            dedupId: this.resolverDedupId,
-            ownerIsObject: true,
-            objectRef: this,
-            _function: 'initActionResolution',
-            paramsArray: [prefix, ec]
-          }
-        });
+                             refName: key,
+                             loader: {
+                               module,
+                               factoryType: FactoryType.jsonFile
+                             },
+                             setter: {
+                               ownerIsObject: true,
+                               objectRef: this,
+                               _function: 'setHintResolution',
+                               paramsArray: [ec]
+                             },
+                             action: {
+                               dedupId: this.resolverDedupId,
+                               ownerIsObject: true,
+                               objectRef: this,
+                               _function: 'initActionResolution',
+                               paramsArray: [prefix, ec]
+                             }
+                           });
       } catch (err) {
         const error = new Error(`Cannot load JSON from relative path ${resource}`);
         log.error(err);
@@ -255,6 +263,7 @@ export class Hints extends Map<string, string | Object> {
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {
+      // @ts-ignore
       super.set(match[1], match[2].trim());
       matchBoundaries.unshift({start: match.index, end: nvRegex.lastIndex});
     }
@@ -268,6 +277,7 @@ export class Hints extends Map<string, string | Object> {
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {
+      // @ts-ignore Left over from migration come back to fix this
       super.set(match[1], match[2]);
       matchBoundaries.unshift({start: match.index, end: nvRegex.lastIndex});
     }
@@ -279,18 +289,26 @@ export class Hints extends Map<string, string | Object> {
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {
+      // @ts-ignore Left over from migration come back to fix this
       const key = match[1].trim();
+      // @ts-ignore Left over from migration come back to fix this
       const moduleName = match[3].trim();
+      // @ts-ignore Left over from migration come back to fix this
       const attribOrFunction = match[4].trim();
       let functionName: string, propertyName: string;
       if (attribOrFunction === ':') {
+        // @ts-ignore Left over from migration come back to fix this
         propertyName = match[5].trim();
       } else {
+        // @ts-ignore Left over from migration come back to fix this
         functionName = match[5].trim();
       }
+      // @ts-ignore Left over from migration come back to fix this
       const module: ModuleDefinition = {
         moduleName,
+        // @ts-ignore Left over from migration come back to fix this
         functionName,
+        // @ts-ignore Left over from migration come back to fix this
         propertyName
       };
       // Do add the hint with a temporary placeholder, it will be replaced upon resolution.
@@ -301,25 +319,25 @@ export class Hints extends Map<string, string | Object> {
       super.set(key, tempHintValue);
       // We need to allow module resolver to just have an action...because here init will only be called if there's a module loaded and we need to set prefix once and abosulately once
       moduleResolver.add({
-        refName: key,
-        loader: {
-          module,
-          factoryType: FactoryType.jsonFactoryAttribute
-        },
-        setter: {
-          ownerIsObject: true,
-          objectRef: this,
-          _function: 'setHintResolution',
-          paramsArray: [ec]
-        },
-        action: {
-          dedupId: this.resolverDedupId,
-          ownerIsObject: true,
-          objectRef: this,
-          _function: 'initActionResolution',
-          paramsArray: [prefix, ec]
-        }
-      });
+                           refName: key,
+                           loader: {
+                             module,
+                             factoryType: FactoryType.jsonFactoryAttribute
+                           },
+                           setter: {
+                             ownerIsObject: true,
+                             objectRef: this,
+                             _function: 'setHintResolution',
+                             paramsArray: [ec]
+                           },
+                           action: {
+                             dedupId: this.resolverDedupId,
+                             ownerIsObject: true,
+                             objectRef: this,
+                             _function: 'initActionResolution',
+                             paramsArray: [prefix, ec]
+                           }
+                         });
       matchBoundaries.unshift({start: match.index, end: nvRegex.lastIndex});
     }
     // Build a new string removing prior results, which are sorted in reverse index
@@ -344,15 +362,15 @@ export class Hints extends Map<string, string | Object> {
     // Only add module resolver action to initialize  if something was loaded.
     if (moduleResolver.hasPendingResolutions()) {
       moduleResolver.add({
-        refName: 'all',
-        action: {
-          dedupId: this.resolverDedupId,
-          ownerIsObject: true,
-          objectRef: this,
-          _function: 'initActionResolution',
-          paramsArray: [prefix, ec]
-        }
-      });
+                           refName: 'all',
+                           action: {
+                             dedupId: this.resolverDedupId,
+                             ownerIsObject: true,
+                             objectRef: this,
+                             _function: 'initActionResolution',
+                             paramsArray: [prefix, ec]
+                           }
+                         });
     } else {
       // Force initialization;
       this.initActionResolution(true, prefix, ec);
@@ -363,6 +381,7 @@ export class Hints extends Map<string, string | Object> {
   loadAndResolve(prefix?: string, ec?: LogExecutionContext): Hints | Promise<Hints> {
     const log = new LoggerAdapter(ec, 'app-utility', 'hints', 'loadAndResolve');
     const moduleResolver = new ModuleResolver();
+    // @ts-ignore Left over from migration come back to fix this
     this.load(moduleResolver, prefix, ec);
     if (moduleResolver.hasPendingResolutions()) {
       const results = moduleResolver.resolve(ec);
@@ -391,9 +410,11 @@ export class Hints extends Map<string, string | Object> {
       const key = next.value;
       if (this.has(key)) {
         if (replace) {
+          // @ts-ignore Left over from migration come back to fix this
           this.set(key, oHints.get(key));
         }
       } else {
+        // @ts-ignore Left over from migration come back to fix this
         this.set(key, oHints.get(key));
       }
     }
@@ -409,27 +430,31 @@ export class Hints extends Map<string, string | Object> {
     }
   }
 
-
+// @ts-ignore Left over from migration come back to fix this
   clear(ec?: LogExecutionContext) {
     this.checkInit(ec);
     super.clear();
   }
 
+// @ts-ignore Left over from migration come back to fix this
   delete(key: string, ec?: LogExecutionContext): boolean {
     this.checkInit(ec);
     return super.delete(key);
   }
 
+// @ts-ignore Left over from migration come back to fix this
   get(key: string, ec?: LogExecutionContext): string | Object | undefined {
     this.checkInit(ec);
     return super.get(key);
   }
 
+// @ts-ignore Left over from migration come back to fix this
   has(key: string, ec?: LogExecutionContext): boolean {
     this.checkInit(ec);
     return super.has(key);
   }
 
+// @ts-ignore Left over from migration come back to fix this
   set(key: string, value: string | Object, ec?: LogExecutionContext): this {
     this.checkInit(ec);
     return super.set(key, value);

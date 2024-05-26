@@ -1,8 +1,8 @@
-import chai from 'chai';
+import * as chai from 'chai';
 import 'mocha';
 import {isPromise} from 'util/types';
 
-import {Hints} from '../publish/mjs/index.js'
+import {Hints} from '@franzzemen/hints';
 
 
 let should = chai.should();
@@ -20,6 +20,7 @@ describe('Hint Tests', () => {
       return;
     } else {
       hints.size.should.equal(1);
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('header').should.exist;
     }
   });
@@ -31,6 +32,7 @@ describe('Hint Tests', () => {
       return;
     } else {
       hints.size.should.equal(1);
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('key').should.equal('value');
     }
   });
@@ -42,6 +44,7 @@ describe('Hint Tests', () => {
       return;
     } else {
       hints.size.should.equal(1);
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('key').should.equal('value');
     }
   });
@@ -53,6 +56,7 @@ describe('Hint Tests', () => {
       return;
     } else {
       hints.size.should.equal(1);
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('key-1').should.equal('value');
     }
   });
@@ -64,7 +68,9 @@ describe('Hint Tests', () => {
       return;
     } else {
       hints.size.should.equal(2);
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('key').should.equal('value');
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('key2').should.equal('value2');
     }
   });
@@ -76,7 +82,9 @@ describe('Hint Tests', () => {
       return;
     } else {
       hints.size.should.equal(2);
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('key').should.equal('value');
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('key-type').should.equal('value2');
     }
   });
@@ -88,6 +96,7 @@ describe('Hint Tests', () => {
       return;
     } else {
       hints.size.should.equal(1);
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('key').should.equal('value');
     }
   });
@@ -99,6 +108,7 @@ describe('Hint Tests', () => {
       return;
     } else {
       hints.size.should.equal(1);
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('key').should.equal('some value');
     }
   });
@@ -110,6 +120,7 @@ describe('Hint Tests', () => {
       return;
     } else {
       hints.size.should.equal(2);
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('header').should.equal('header');
     }
   });
@@ -121,23 +132,28 @@ describe('Hint Tests', () => {
       return;
     } else {
       hints.size.should.equal(3);
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('header').should.equal('header');
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('key').should.equal('value');
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('key2').should.equal('some value 2');
     }
   });
   it('should parse with wraps <<some-prefix key=value>>', () => {
     const [remaining, hintsOrPromise] = Hints.parseAndResolveHints('<<some-prefix key=value>>', 'some-prefix');
-    if(isPromise(hintsOrPromise)) {
+    if (isPromise(hintsOrPromise)) {
       unreachableCode.should.be.true;
       return
-    }
-    else {
+    } else {
       remaining.length.should.equal(0);
       const hints = hintsOrPromise;
       hints.size.should.equal(3);
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('some-prefix').should.equal('some-prefix');
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('prefix').should.equal('some-prefix');
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('key').should.equal('value');
     }
   });
@@ -209,6 +225,7 @@ describe('Hint Tests', () => {
       const obj = hints.get('simple-json-object');
       if (typeof obj === 'object') {
         ('foo' in obj).should.be.true;
+        // @ts-ignore Left over from migration come back to fix this
         obj['foo'].should.equal('bar');
       }
     }
@@ -225,7 +242,9 @@ describe('Hint Tests', () => {
       const obj = hints.get('complex-json-object');
       if (typeof obj === 'object') {
         ('foo' in obj).should.be.true;
+        // @ts-ignore Left over from migration come back to fix this
         Array.isArray(obj['foo'].bar).should.be.true;
+        // @ts-ignore Left over from migration come back to fix this
         obj['foo'].bar[1].should.equal(2);
       }
     }
@@ -240,6 +259,7 @@ describe('Hint Tests', () => {
     } else {
       hints.size.should.equal(2);
       const obj = hints.get('complex-json-array');
+      // @ts-ignore Left over from migration come back to fix this
       obj[1].some.should.equal('value');
     }
   });
@@ -253,53 +273,57 @@ describe('Hint Tests', () => {
     } else {
       hints.size.should.equal(2);
       const obj = hints.get('complex-json-array');
+      // @ts-ignore Left over from migration come back to fix this
       obj[1].some.should.equal('../folder');
     }
   });
 
   it('should parseAndResolveHints complex JSON array with folder spec [{foo: {bar: [1, 2, true]}}, {some: "../folder"}]', () => {
     const [remaining, hintsOrPromise] = Hints.parseAndResolveHints('<<re complex-json-array = [{"foo": {"bar": [1, 2, true]}}, {"some": "../folder"}] key=value>>', 're');
-    if(isPromise(hintsOrPromise)) {
+    if (isPromise(hintsOrPromise)) {
       unreachableCode.should.be.true;
     } else {
       const hints: Hints = hintsOrPromise;
 
       hints.size.should.equal(4);
       const obj = hints.get('complex-json-array');
+      // @ts-ignore Left over from migration come back to fix this
       obj[1].some.should.equal('../folder');
       remaining.should.equal('');
     }
   });
-
+// @ts-ignore Left over from migration come back to fix this
   it('should load JSON from relative path ', () => {
-    const [remaining, hintsOrPromise] = Hints.parseAndResolveHints('<<re json = @(require:./testing-mjs/test.json)>>', 're');
-    if(isPromise(hintsOrPromise)) {
-     return hintsOrPromise
-       // @ts-ignore
-       .then((hints :HintsType) => {
+    const [remaining, hintsOrPromise] = Hints.parseAndResolveHints('<<re json = @(require:./out/test/test.json)>>', 're');
+    if (isPromise(hintsOrPromise)) {
+      return hintsOrPromise
+        // @ts-ignore
+        .then((hints: HintsType) => {
 
-        hints.size.should.equal(3);
-        const obj = hints.get('json');
-        remaining.should.equal('');
-        return;
-      })
+          hints.size.should.equal(3);
+          const obj = hints.get('json');
+          remaining.should.equal('');
+          return;
+        })
     } else {
       unreachableCode.should.be.true;
     }
   });
 
+  // @ts-ignore Left over from migration come back to fix this
   it('should load JSON from module/function ', () => {
     const [remaining, hintsOrPromise] = Hints.parseAndResolveHints('<<re json = @(import:@franzzemen/test=>getJSON)>>', 're');
-    if(isPromise(hintsOrPromise)) {
+    if (isPromise(hintsOrPromise)) {
       return hintsOrPromise
         .then(hints => {
           // @ts-ignore
           hints.size.should.equal(3);
           // @ts-ignore
           const obj = hints.get('json');
+          // @ts-ignore Left over from migration come back to fix this
           obj['hello'].should.equal('world');
           remaining.should.equal('');
-        }, err=> {
+        }, err => {
           console.error(err);
           unreachableCode.should.be.true;
         })
@@ -307,15 +331,17 @@ describe('Hint Tests', () => {
       unreachableCode.should.be.true;
     }
   });
+  // @ts-ignore Left over from migration come back to fix this
   it('should load JSON from module/attribute ', () => {
-    const [remaining, hintsOrPromise]= Hints.parseAndResolveHints('<<re json = @(import:@franzzemen/test:jsonStr)>>', 're');
-    if(isPromise(hintsOrPromise)) {
+    const [remaining, hintsOrPromise] = Hints.parseAndResolveHints('<<re json = @(import:@franzzemen/test:jsonStr)>>', 're');
+    if (isPromise(hintsOrPromise)) {
       return hintsOrPromise
         .then(hints => {
           // @ts-ignore
           hints.size.should.equal(3);
           // @ts-ignore
           const obj = hints.get('json');
+          // @ts-ignore Left over from migration come back to fix this
           obj['prop'].should.equal('jsonStr');
           remaining.should.equal('');
         });
@@ -325,27 +351,31 @@ describe('Hint Tests', () => {
   });
   it('should parse folder paths without quotes (without spaces) ', () => {
     const [remaining, hintsOrPromise] = Hints.parseAndResolveHints('<<re path=./../../some-_Path>>', 're');
-    if(isPromise(hintsOrPromise)) {
+    if (isPromise(hintsOrPromise)) {
       unreachableCode.should.be.true;
     } else {
       const hints: Hints = hintsOrPromise;
 
       hints.size.should.equal(3);
       const obj = hints.get('path');
+      // @ts-ignore Left over from migration come back to fix this
       obj.should.equal('./../../some-_Path');
       remaining.should.equal('');
     }
   });
   it('should peek hints', () => {
     const hintsOrPromise = Hints.peekAndResolveHints('<<re name=Hello>>', 're');
-    if(isPromise(hintsOrPromise)) {
+    if (isPromise(hintsOrPromise)) {
       unreachableCode.should.be.true;
     } else {
       const hints = hintsOrPromise;
 
       hints.size.should.equal(3);
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('re').should.equal('re');
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('prefix').should.equal('re');
+      // @ts-ignore Left over from migration come back to fix this
       hints.get('name').should.equal('Hello');
     }
   });

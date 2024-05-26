@@ -1,6 +1,6 @@
 {
   "name": "@franzzemen/hints",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "Text based hints",
   "type": "module",
   "exports": {

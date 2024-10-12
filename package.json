@@ -25,23 +25,24 @@
   },
   "homepage": "https://github.com/FranzZemen/hints#readme",
   "devDependencies": {
-    "@franzzemen/build-system": "^5.1.0",
+    "@franzzemen/build-system": "^12.1.1",
     "@franzzemen/test": "^3.0.1",
-    "@types/chai": "^4.3.16",
-    "@types/lodash": "^4.17.4",
-    "@types/mocha": "^10.0.6",
-    "@types/node": "^20.12.12",
-    "@types/uuid": "^9.0.8",
+    "@types/chai": "^5.0.0",
+    "@types/lodash": "^4.17.10",
+    "@types/mocha": "^10.0.9",
+    "@types/node": "^22.7.5",
+    "@types/uuid": "^10.0.0",
     "chai": "^5.1.1",
-    "fastest-validator": "^1.18.0",
-    "mocha": "^10.4.0",
-    "typescript": "^5.4.5"
+    "fastest-validator": "^1.19.0",
+    "mocha": "^10.7.3",
+    "typescript": "^5.6.3"
   },
   "dependencies": {
-    "@franzzemen/enhanced-error": "^5.0.0",
-    "@franzzemen/logger-adapter": "^10.2.1",
-    "@franzzemen/module-factory": "^9.0.0",
-    "@franzzemen/module-resolver": "^5.0.0",
-    "uuid": "^9.0.1"
+    "@franzzemen/enhanced-error": "^6.0.0",
+    "@franzzemen/execution-context": "^12.0.16",
+    "@franzzemen/logger-adapter": "^14.0.18",
+    "@franzzemen/module-factory": "^10.0.7",
+    "@franzzemen/module-resolver": "^5.0.1",
+    "uuid": "^10.0.0"
   }
 }

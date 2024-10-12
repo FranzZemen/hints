@@ -3,17 +3,11 @@ Created by Franz Zemen 11/04/2022
 License Type: MIT
 */
 import {EnhancedError, logErrorAndReturn, logErrorAndThrow} from '@franzzemen/enhanced-error';
-import {LogExecutionContext, LoggerAdapter} from '@franzzemen/logger-adapter';
-import {loadJSONResource, ModuleDefinition} from '@franzzemen/module-factory';
-import {
-  FactoryType,
-  ModuleResolutionActionInvocation,
-  ModuleResolutionResult,
-  ModuleResolutionSetterInvocation,
-  ModuleResolver
-} from '@franzzemen/module-resolver';
-import {isPromise} from 'util/types';
+import {LoggerAdapter} from '@franzzemen/logger-adapter';
+import {ModuleDefinition} from '@franzzemen/module-factory';
+import {FactoryType, ModuleResolutionActionInvocation, ModuleResolutionResult, ModuleResolutionSetterInvocation, ModuleResolver} from '@franzzemen/module-resolver';
 import {v4 as uuidv4} from 'uuid';
+import {ExecutionContext} from '@franzzemen/execution-context';
 
 
 export interface HintAwaitingModuleLoad {
@@ -30,11 +24,11 @@ export class Hints extends Map<string, string | Object> {
   loaded = false;
   resolverDedupId = uuidv4();
 
-  constructor(hintBody: string, ec?: LogExecutionContext) {
+  constructor(hintBody: string, ec: ExecutionContext) {
     super();
     const log = new LoggerAdapter(ec, 'app-utility', 'hints', 'constructor');
     if (hintBody === undefined) {
-      logErrorAndThrow(new EnhancedError('Undefined hint body'));
+      logErrorAndThrow(new EnhancedError('Undefined hint body'), new LoggerAdapter(ec, 'hints', 'hints', 'constructor'));
     }
     this.hintBody = hintBody.trim();
   }
@@ -48,7 +42,7 @@ export class Hints extends Map<string, string | Object> {
    * @param ec
    * @param enclosure
    */
-  static peekHints(near: string, prefix: string, ec?: LogExecutionContext, enclosure: { start: string, end: string } = {
+  static peekHints(near: string, prefix: string, ec: ExecutionContext, enclosure: { start: string, end: string } = {
     start: '<<',
     end: '>>'
   }): Hints {
@@ -60,7 +54,7 @@ export class Hints extends Map<string, string | Object> {
     return hints;
   }
 
-  static peekAndResolveHints(near: string, prefix: string, ec?: LogExecutionContext, enclosure: { start: string, end: string } = {
+  static peekAndResolveHints(near: string, prefix: string, ec: ExecutionContext, enclosure: { start: string, end: string } = {
     start: '<<',
     end: '>>'
   }): Hints | Promise<Hints> {
@@ -68,7 +62,7 @@ export class Hints extends Map<string, string | Object> {
     return Hints.captureAndResolveHints(near, prefix, ec, enclosure);
   }
 
-  static consumeHints(near: string, prefix: string, ec?: LogExecutionContext, enclosure: { start: string, end: string } = {
+  static consumeHints(near: string, prefix: string, ec: ExecutionContext, enclosure: { start: string, end: string } = {
     start: '<<',
     end: '>>'
   }): string {
@@ -89,7 +83,7 @@ export class Hints extends Map<string, string | Object> {
     }
   }
 
-  static parseHints(moduleResolver: ModuleResolver, near: string, prefix: string, ec?: LogExecutionContext, enclosure: { start: string, end: string } = {
+  static parseHints(moduleResolver: ModuleResolver, near: string, prefix: string, ec: ExecutionContext, enclosure: { start: string, end: string } = {
     start: '<<',
     end: '>>'
   }): [string, Hints] {
@@ -100,7 +94,7 @@ export class Hints extends Map<string, string | Object> {
     return [remaining, hints];
   }
 
-  static parseAndResolveHints(near: string, prefix: string, ec?: LogExecutionContext, enclosure: { start: string, end: string } = {
+  static parseAndResolveHints(near: string, prefix: string, ec: ExecutionContext, enclosure: { start: string, end: string } = {
     start: '<<',
     end: '>>'
   }): [string, Hints | Promise<Hints>] {
@@ -111,7 +105,7 @@ export class Hints extends Map<string, string | Object> {
     return [remaining, hintsResult];
   }
 
-  private static captureHints(moduleResolver: ModuleResolver, near: string, prefix: string, ec?: LogExecutionContext, enclosure: { start: string, end: string } = {
+  private static captureHints(moduleResolver: ModuleResolver, near: string, prefix: string, ec: ExecutionContext, enclosure: { start: string, end: string } = {
     start: '<<',
     end: '>>'
   }): Hints {
@@ -132,7 +126,7 @@ export class Hints extends Map<string, string | Object> {
     }
   }
 
-  private static captureAndResolveHints(near: string, prefix: string, ec?: LogExecutionContext, enclosure: { start: string, end: string } = {
+  private static captureAndResolveHints(near: string, prefix: string, ec: ExecutionContext, enclosure: { start: string, end: string } = {
     start: '<<',
     end: '>>'
   }): Hints | Promise<Hints> {
@@ -152,7 +146,7 @@ export class Hints extends Map<string, string | Object> {
     }
   }
 
-  private static validatePrefix(near: string, prefix: string, ec?: LogExecutionContext) {
+  private static validatePrefix(near: string, prefix: string, ec: ExecutionContext) {
     if (prefix) {
       if (!/^[a-z0-9]+[-a-z0-9]*[a-z0-9]+$/.test(prefix)) {
         const err = new EnhancedError(`Prefix must be lower case, use letters or numbers or the symbol -, but not at the start or the end.  It must be at least 2 characters long. Near ${near}`);
@@ -164,12 +158,12 @@ export class Hints extends Map<string, string | Object> {
 
   // For use by ModuleResolver
   // @ts-ignore
-  setHintResolution: ModuleResolutionSetterInvocation = (key: string, value: any, result: ModuleResolutionResult, ec?: LogExecutionContext) => {
+  setHintResolution: ModuleResolutionSetterInvocation = (key: string, value: any, result: ModuleResolutionResult, ec: ExecutionContext) => {
     super.set(key, value);
     return Promise.resolve(true);
   };
 
-  initActionResolution: ModuleResolutionActionInvocation = (successfulResolution: boolean, prefix: string, ec?: LogExecutionContext) => {
+  initActionResolution: ModuleResolutionActionInvocation = (successfulResolution: boolean, prefix: string, ec: ExecutionContext) => {
     // Regardless over overall success, that this method is called means that all module resoltuions associated with this
     // instance were satisfied.
     this.initialized = true;
@@ -186,7 +180,7 @@ export class Hints extends Map<string, string | Object> {
    * @param prefix
    * @param ec
    */
-  public load(moduleResolver: ModuleResolver, prefix: string, ec?: LogExecutionContext) {
+  public load(moduleResolver: ModuleResolver, prefix: string, ec: ExecutionContext) {
     const log = new LoggerAdapter(ec, 'app-utility', 'hints', 'loadAndInitialize');
     // Locate name, value pairs with JSON
     let nvRegex = /([a-z0-9]+[-a-z0-9]*[a-z0-9]+)[\s]*=[\s]*([\[{][^]*[}|\]])/g;
@@ -245,7 +239,7 @@ export class Hints extends Map<string, string | Object> {
                                _function: 'initActionResolution',
                                paramsArray: [prefix, ec]
                              }
-                           });
+                           }, ec);
       } catch (err) {
         const error = new Error(`Cannot load JSON from relative path ${resource}`);
         log.error(err);
@@ -337,7 +331,7 @@ export class Hints extends Map<string, string | Object> {
                              _function: 'initActionResolution',
                              paramsArray: [prefix, ec]
                            }
-                         });
+                         }, ec);
       matchBoundaries.unshift({start: match.index, end: nvRegex.lastIndex});
     }
     // Build a new string removing prior results, which are sorted in reverse index
@@ -351,7 +345,11 @@ export class Hints extends Map<string, string | Object> {
     match = undefined;
     matchBoundaries = [];
     while ((match = nvRegex.exec(hintsCopy)) !== null) {
-      super.set(match[0], match[0]);
+      if(match[0] !== undefined) {
+        super.set(match[0], match[0]);
+      } else {
+        throw new EnhancedError('Unexpected error in hints');
+      }
       matchBoundaries.unshift({start: match.index, end: nvRegex.lastIndex});
     }
     matchBoundaries.forEach(boundary => {
@@ -370,7 +368,7 @@ export class Hints extends Map<string, string | Object> {
                              _function: 'initActionResolution',
                              paramsArray: [prefix, ec]
                            }
-                         });
+                         }, ec);
     } else {
       // Force initialization;
       this.initActionResolution(true, prefix, ec);
@@ -378,7 +376,7 @@ export class Hints extends Map<string, string | Object> {
     this.loaded = true;
   }
 
-  loadAndResolve(prefix?: string, ec?: LogExecutionContext): Hints | Promise<Hints> {
+  loadAndResolve(prefix: string, ec: ExecutionContext): Hints | Promise<Hints> {
     const log = new LoggerAdapter(ec, 'app-utility', 'hints', 'loadAndResolve');
     const moduleResolver = new ModuleResolver();
     // @ts-ignore Left over from migration come back to fix this
@@ -390,10 +388,10 @@ export class Hints extends Map<string, string | Object> {
           const someErrors = ModuleResolver.resolutionsHaveErrors(resolutions);
           if (someErrors) {
             log.warn(resolutions, 'Errors resolving modules');
-            throw logErrorAndReturn(new EnhancedError('Errors resolving modules'));
+            throw logErrorAndReturn(new EnhancedError('Errors resolving modules'), new LoggerAdapter(ec, 'hints', 'hints', 'loadAndResolve'));
           } else {
             this.initialized = true;
-            moduleResolver.clear();
+            moduleResolver.clear(ec);
             return this;
           }
         });
@@ -402,13 +400,13 @@ export class Hints extends Map<string, string | Object> {
     }
   }
 
-  mergeInto(oHints: Hints, replace = false, ec?: LogExecutionContext) {
-    this.checkInit();
+  mergeInto(oHints: Hints, replace = false, ec: ExecutionContext) {
+    this.checkInit(ec);
     let next;
     let iter = oHints.keys();
     while ((next = iter.next()) && !next.done) {
       const key = next.value;
-      if (this.has(key)) {
+      if (this.has(key,ec)) {
         if (replace) {
           // @ts-ignore Left over from migration come back to fix this
           this.set(key, oHints.get(key));
@@ -420,7 +418,7 @@ export class Hints extends Map<string, string | Object> {
     }
   }
 
-  checkInit(ec?: LogExecutionContext) {
+  checkInit(ec: ExecutionContext) {
     if (!this.initialized) {
       if (!this.loaded) {
         const log = new LoggerAdapter(ec, 'app-utility', 'hints', 'checkInit');
@@ -431,31 +429,31 @@ export class Hints extends Map<string, string | Object> {
   }
 
 // @ts-ignore Left over from migration come back to fix this
-  clear(ec?: LogExecutionContext) {
+  clear(ec: ExecutionContext) {
     this.checkInit(ec);
     super.clear();
   }
 
 // @ts-ignore Left over from migration come back to fix this
-  delete(key: string, ec?: LogExecutionContext): boolean {
+  delete(key: string, ec: ExecutionContext): boolean {
     this.checkInit(ec);
     return super.delete(key);
   }
 
 // @ts-ignore Left over from migration come back to fix this
-  get(key: string, ec?: LogExecutionContext): string | Object | undefined {
+  get(key: string, ec: ExecutionContext): string | Object | undefined {
     this.checkInit(ec);
     return super.get(key);
   }
 
 // @ts-ignore Left over from migration come back to fix this
-  has(key: string, ec?: LogExecutionContext): boolean {
+  has(key: string, ec: ExecutionContext): boolean {
     this.checkInit(ec);
     return super.has(key);
   }
 
 // @ts-ignore Left over from migration come back to fix this
-  set(key: string, value: string | Object, ec?: LogExecutionContext): this {
+  set(key: string, value: string | Object, ec: ExecutionContext): this {
     this.checkInit(ec);
     return super.set(key, value);
   }
